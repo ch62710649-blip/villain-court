@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>빌런 재판소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#5b3a24; --wood-dark:#3d2617; --wood-light:#8a5a3a;
+    --paper:#fbf6ea; --paper-line:#e9dfc6;
+    --ink:#2b2118; --muted:#7a6a58;
+    --gold:#d9a441; --red:#c8402f; --blue:#3d6fb0; --green:#3f8a5a; --orange:#d9822b;
+    --chip:#fff; --chip-on:#2b2118;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Noto Sans KR',system-ui,sans-serif; color:var(--ink);
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 120px),
+      linear-gradient(180deg,#6b4429 0%, #4a2e1c 100%);
+    min-height:100vh;
+  }
+  header{ text-align:center; padding:28px 16px 8px; color:#fff6e0; }
+  header h1{ font-family:'Jua',sans-serif; font-size:clamp(34px,6vw,52px); margin:0; letter-spacing:2px;
+    text-shadow:0 3px 0 var(--wood-dark), 0 6px 18px rgba(0,0,0,.35); }
+  header h1 .scale{ display:inline-block; animation:sway 3s ease-in-out infinite; }
+  header p{ margin:6px 0 0; opacity:.85; font-size:15px; }
+  @keyframes sway{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:16px; display:grid; grid-template-columns:380px 1fr; gap:24px; align-items:start; }
+  @media (max-width:900px){ .wrap{ grid-template-columns:1fr; } }
+
+  /* ===== 판사석 ===== */
+  .bench{ position:sticky; top:16px; }
+  @media (max-width:900px){ .bench{ position:relative; top:0; } }
+  .bench-card{
+    background:linear-gradient(180deg,var(--wood-light),var(--wood));
+    border:4px solid var(--wood-dark); border-radius:22px; padding:18px 16px 0; text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.15);
+    overflow:hidden;
+  }
+  .bubble{
+    position:relative; background:#fff; border-radius:16px; padding:12px 14px; font-size:15px; line-height:1.5;
+    min-height:58px; display:flex; align-items:center; justify-content:center; text-align:center;
+    box-shadow:0 4px 0 rgba(0,0,0,.15); margin-bottom:14px; font-family:'Jua',sans-serif; font-size:17px;
+    transition:transform .2s;
+  }
+  .bubble::after{ content:''; position:absolute; bottom:-12px; left:50%; transform:translateX(-50%);
+    border:12px solid transparent; border-top-color:#fff; border-bottom:0; }
+  .bubble.pop{ animation:pop .35s ease; }
+  @keyframes pop{0%{transform:scale(.92)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+  #hamster{ width:100%; max-width:300px; display:block; margin:0 auto; cursor:pointer; }
+  #hamster .head-g{ transform-origin:100px 110px; transition:transform .4s; }
+  #hamster.thinking .head-g{ animation:tilt 1.2s ease-in-out infinite; }
+  #hamster.angry .head-g{ animation:shake .25s linear infinite; }
+  @keyframes tilt{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+  #gavel{ transform-origin:160px 190px; transition:transform .15s; }
+  #gavel.bang{ animation:bang .5s ease; }
+  @keyframes bang{0%{transform:rotate(0)}40%{transform:rotate(-35deg)}70%{transform:rotate(12deg)}100%{transform:rotate(0)}}
+  .desk{
+    margin:0 -16px; background:linear-gradient(180deg,var(--wood-dark),#2a1910); color:var(--gold);
+    padding:12px; font-family:'Gowun Batang',serif; font-weight:700; letter-spacing:3px; font-size:15px;
+    border-top:3px solid #24150c;
+  }
+  .meter{ margin:14px 0 4px; text-align:left; color:#fff6e0; font-size:13px; }
+  .meter-bar{ height:12px; background:rgba(0,0,0,.3); border-radius:99px; overflow:hidden; margin-top:6px; }
+  .meter-fill{ height:100%; width:0; background:linear-gradient(90deg,var(--green),var(--gold),var(--red)); transition:width .5s; border-radius:99px; }
+  .meter-label{ display:flex; justify-content:space-between; }
+
+  /* ===== 카드 공통 ===== */
+  .card{
+    background:var(--paper); border-radius:var(--radius); padding:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3); position:relative;
+  }
+  .card h2{ font-family:'Jua',sans-serif; font-weight:400; margin:0 0 4px; font-size:26px; }
+  .card .sub{ color:var(--muted); margin:0 0 18px; font-size:14px; }
+  .field{ margin-bottom:22px; }
+  .field > label, .field > .label{ display:block; font-weight:700; margin-bottom:8px; font-size:15px; }
+  .field .hint{ font-weight:400; color:var(--muted); font-size:13px; margin-left:6px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    border:2px solid var(--ink); background:var(--chip); color:var(--ink); border-radius:999px;
+    padding:7px 14px; font:inherit; font-size:14px; cursor:pointer; transition:all .15s; user-select:none;
+  }
+  .chip:hover{ transform:translateY(-2px); box-shadow:0 3px 0 var(--ink); }
+  .chip.on{ background:var(--chip-on); color:#fff; }
+  input[type=text], textarea{
+    width:100%; border:2px solid #d8ccb0; border-radius:12px; padding:12px 14px; font:inherit; font-size:15px;
+    background:#fff; color:var(--ink); outline:none; transition:border-color .15s;
+  }
+  input[type=text]:focus, textarea:focus{ border-color:var(--wood-light); }
+  textarea{ resize:vertical; line-height:1.6; }
+  #story{ min-height:170px; }
+  #selfFault{ min-height:70px; }
+  .nick-custom{ margin-top:10px; }
+  .counter{ text-align:right; font-size:12px; color:var(--muted); margin-top:4px; }
+  .warn{
+    display:none; margin-top:8px; background:#fff1e6; border:1.5px dashed var(--orange); border-radius:10px;
+    padding:10px 12px; font-size:13.5px; line-height:1.5;
+  }
+  .warn.show{ display:block; }
+  .warn button{ margin-left:6px; border:0; background:var(--orange); color:#fff; border-radius:8px; padding:4px 10px; cursor:pointer; font:inherit; font-size:13px; }
+  .seg{ display:flex; border:2px solid var(--ink); border-radius:12px; overflow:hidden; }
+  .seg button{ flex:1; border:0; background:#fff; padding:10px 4px; font:inherit; font-size:14px; cursor:pointer; border-right:2px solid var(--ink); }
+  .seg button:last-child{ border-right:0; }
+  .seg button.on{ background:var(--ink); color:#fff; }
+  .range-row{ display:flex; align-items:center; gap:14px; }
+  input[type=range]{ flex:1; accent-color:var(--red); height:28px; }
+  .range-val{ min-width:120px; font-family:'Jua',sans-serif; font-size:18px; text-align:right; }
+  .submit{
+    width:100%; border:0; border-radius:14px; padding:16px; font-family:'Jua',sans-serif; font-size:22px;
+    background:var(--red); color:#fff; cursor:pointer; box-shadow:0 5px 0 #8c2a1e; transition:transform .1s, box-shadow .1s;
+  }
+  .submit:hover{ filter:brightness(1.05); }
+  .submit:active{ transform:translateY(4px); box-shadow:0 1px 0 #8c2a1e; }
+  .submit:disabled{ background:#aaa; box-shadow:0 5px 0 #777; cursor:not-allowed; }
+  .err{ color:var(--red); font-size:13.5px; margin-top:10px; min-height:18px; text-align:center; }
+
+  /* ===== 심리 중 ===== */
+  .deliberating{ display:none; text-align:center; padding:60px 20px; }
+  .deliberating.show{ display:block; }
+  .deliberating .big{ font-size:60px; animation:sway 1s ease-in-out infinite; display:inline-block; }
+  .deliberating h3{ font-family:'Jua',sans-serif; font-weight:400; font-size:24px; margin:10px 0 6px; }
+  .deliberating p{ color:var(--muted); margin:0; min-height:24px; }
+  .dots::after{ content:''; animation:dots 1.2s steps(4) infinite; }
+  @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+  /* ===== 판결문 ===== */
+  .verdict{ display:none; font-family:'Gowun Batang',serif;
+    background: repeating-linear-gradient(180deg, transparent 0 31px, var(--paper-line) 31px 32px), var(--paper);
+  }
+  .verdict.show{ display:block; animation:fadeUp .5s ease; }
+  @keyframes fadeUp{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:none}}
+  .v-head{ text-align:center; border-bottom:3px double var(--ink); padding-bottom:14px; margin-bottom:18px; }
+  .v-head .court{ letter-spacing:6px; font-size:14px; color:var(--muted); }
+  .v-head h2{ font-family:'Gowun Batang',serif; font-weight:700; font-size:34px; letter-spacing:12px; margin:6px 0; }
+  .v-meta{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:13.5px; color:var(--muted); }
+  .stamp-wrap{ text-align:center; margin:8px 0 22px; }
+  .stamp{
+    display:inline-block; font-family:'Jua',sans-serif; font-size:44px; padding:6px 26px; border:6px solid currentColor;
+    border-radius:14px; transform:rotate(-8deg); letter-spacing:4px; opacity:0;
+  }
+  .stamp.go{ animation:stamp .55s cubic-bezier(.2,1.6,.4,1) forwards; }
+  @keyframes stamp{0%{opacity:0; transform:rotate(-8deg) scale(2.6)}100%{opacity:.92; transform:rotate(-8deg) scale(1)}}
+  .stamp-sub{ margin-top:10px; font-size:15px; color:var(--muted); }
+  .sec{ margin-bottom:22px; }
+  .sec h3{ font-size:19px; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
+  .sec h3 .no{ display:inline-flex; width:26px; height:26px; border-radius:50%; background:var(--ink); color:var(--paper);
+    align-items:center; justify-content:center; font-size:14px; font-family:'Noto Sans KR',sans-serif; }
+  .sec p, .sec li{ line-height:1.85; font-size:16px; }
+  .sec ul{ margin:0; padding-left:22px; }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:640px){ .two{ grid-template-columns:1fr; } }
+  .box{ background:rgba(255,255,255,.7); border-radius:12px; padding:12px 14px; border-left:5px solid var(--ink); }
+  .box.bad{ border-color:var(--red); }
+  .box.sad{ border-color:var(--blue); }
+  .box.self{ border-color:var(--orange); margin-top:14px; }
+  .box h4{ margin:0 0 6px; font-size:15.5px; }
+  .ratio{ margin-top:14px; }
+  .ratio-bar{ display:flex; height:30px; border-radius:10px; overflow:hidden; font-family:'Noto Sans KR',sans-serif; font-size:13px; font-weight:700; color:#fff; }
+  .ratio-bar div{ display:flex; align-items:center; justify-content:center; white-space:nowrap; transition:width .8s; overflow:hidden; }
+  .ratio-legend{ display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:4px; }
+  .crimes{ display:flex; flex-wrap:wrap; gap:8px; }
+  .crime{ background:var(--ink); color:var(--paper); padding:7px 14px; border-radius:8px; font-weight:700; font-size:15px; }
+  .crime.light{ background:transparent; color:var(--ink); border:2px solid var(--ink); }
+  .sentence{ background:#2b2118; color:#fff6e0; border-radius:14px; padding:16px 18px; }
+  .sentence .main{ font-size:22px; font-weight:700; margin-bottom:8px; color:var(--gold); }
+  .sentence li{ font-size:15.5px; }
+  .comfort{
+    display:flex; gap:14px; align-items:flex-start; background:#eaf2fb; border:2px solid #b9d0ec; border-radius:16px; padding:16px;
+    font-family:'Noto Sans KR',sans-serif;
+  }
+  .comfort .emo{ font-size:42px; line-height:1; }
+  .comfort h4{ margin:0 0 6px; font-family:'Jua',sans-serif; font-weight:400; font-size:19px; color:var(--blue); }
+  .comfort p{ margin:0; line-height:1.7; font-size:15.5px; }
+  .sign{ text-align:right; margin-top:24px; font-size:15px; }
+  .sign b{ font-size:18px; }
+  .seal{ display:inline-block; margin-left:8px; color:var(--red); border:2px solid var(--red); border-radius:50%; width:44px; height:44px;
+    line-height:40px; text-align:center; font-weight:700; transform:rotate(-10deg); font-size:13px; vertical-align:middle; }
+  .disclaimer{ text-align:center; font-size:12px; color:var(--muted); margin-top:18px; font-family:'Noto Sans KR',sans-serif; }
+  .actions{ display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; font-family:'Noto Sans KR',sans-serif; }
+  .actions button{ flex:1; min-width:150px; border:2px solid var(--ink); border-radius:12px; padding:12px; font:inherit; font-weight:700; cursor:pointer; background:#fff; }
+  .actions button.primary{ background:var(--ink); color:#fff; }
+  .toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(80px); background:var(--ink); color:#fff;
+    padding:10px 18px; border-radius:99px; transition:transform .3s; z-index:10; font-size:14px; }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="scale">⚖️</span> 빌런 재판소</h1>
+  <p>억울한 사연, 햄스터 판사님이 공정(?)하게 심판해 드립니다</p>
+</header>
+
+<div class="wrap">
+  <!-- ===== 판사석 ===== -->
+  <aside class="bench">
+    <div class="bench-card">
+      <div class="bubble" id="bubble">어서 오세요. 무슨 일이 있었는지 들려주시겠어요?</div>
+      <svg id="hamster" viewBox="0 0 200 215" aria-label="판사 햄스터">
+        <!-- 몸통(법복) -->
+        <path d="M40 215 Q42 150 100 145 Q158 150 160 215 Z" fill="#1e1a24"/>
+        <path d="M88 148 L100 175 L112 148 Z" fill="#fff"/>
+        <path d="M96 150 L100 160 L104 150 Z" fill="#c8402f"/>
+        <!-- 앞발 -->
+        <ellipse cx="72" cy="188" rx="12" ry="9" fill="#e9b07a"/>
+        <!-- 의사봉 -->
+        <g id="gavel">
+          <rect x="140" y="160" width="6" height="42" rx="3" fill="#7a4a28" transform="rotate(35 143 181)"/>
+          <rect x="138" y="145" width="34" height="16" rx="5" fill="#9b6236" transform="rotate(35 155 153)"/>
+          <ellipse cx="146" cy="190" rx="12" ry="9" fill="#e9b07a"/>
+        </g>
+        <g class="head-g">
+          <!-- 귀 -->
+          <ellipse cx="52" cy="58" rx="18" ry="20" fill="#e9b07a"/>
+          <ellipse cx="148" cy="58" rx="18" ry="20" fill="#e9b07a"/>
+          <ellipse cx="52" cy="60" rx="10" ry="12" fill="#f4a6a6"/>
+          <ellipse cx="148" cy="60" rx="10" ry="12" fill="#f4a6a6"/>
+          <!-- 판사 가발 -->
+          <g fill="#f5f2ea" stroke="#d9d2c0" stroke-width="1.5">
+            <circle cx="42" cy="105" r="13"/><circle cx="40" cy="128" r="13"/><circle cx="44" cy="150" r="12"/>
+            <circle cx="158" cy="105" r="13"/><circle cx="160" cy="128" r="13"/><circle cx="156" cy="150" r="12"/>
+          </g>
+          <!-- 얼굴 -->
+          <ellipse cx="100" cy="102" rx="62" ry="56" fill="#e9b07a"/>
+          <ellipse cx="100" cy="120" rx="44" ry="34" fill="#fbe9d3"/>
+          <!-- 가발 윗부분 -->
+          <g fill="#f5f2ea" stroke="#d9d2c0" stroke-width="1.5">
+            <circle cx="62" cy="56" r="13"/><circle cx="82" cy="48" r="14"/><circle cx="100" cy="46" r="14"/>
+            <circle cx="118" cy="48" r="14"/><circle cx="138" cy="56" r="13"/>
+          </g>
+          <!-- 볼 -->
+          <ellipse id="cheekL" cx="66" cy="114" rx="11" ry="7" fill="#f4a6a6" opacity=".7"/>
+          <ellipse id="cheekR" cx="134" cy="114" rx="11" ry="7" fill="#f4a6a6" opacity=".7"/>
+          <!-- 코 -->
+          <ellipse cx="100" cy="108" rx="5" ry="3.5" fill="#c46a5a"/>
+          <!-- 표정 -->
+          <g id="face"></g>
+        </g>
+        <g id="extras"></g>
+      </svg>
+      <div class="meter">
+        <div class="meter-label"><span>🔥 판사님 분노 게이지</span><span id="meterTxt">0%</span></div>
+        <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+      </div>
+      <div class="desk">재판장 햄스터</div>
+    </div>
+  </aside>
+
+  <!-- ===== 메인 ===== -->
+  <main>
+    <!-- 접수 폼 -->
+    <section class="card" id="formCard">
+      <h2>📝 사건 접수</h2>
+      <p class="sub">상대방의 실명은 쓰지 말고 별명으로 불러 주세요. 모든 내용은 내 브라우저 안에서만 처리돼요.</p>
+
+      <div class="field">
+        <span class="label">피고의 별명 <span class="hint">실명 대신 사용할 호칭</span></span>
+        <div class="chips" id="nickChips"></div>
+        <input type="text" id="nickCustom" class="nick-custom" placeholder="직접 입력 (예: 탕비실 빌런)" maxlength="15">
+      </div>
+
+      <div class="field">
+        <span class="label">사건 유형 <span class="hint">여러 개 선택 가능</span></span>
+        <div class="chips" id="typeChips"></div>
+      </div>
+
+      <div class="field">
+        <label for="story">무슨 일이 있었나요? <span class="hint">자유롭게, 자세할수록 정확한 판결</span></label>
+        <textarea id="story" maxlength="2000" placeholder="예) 그 인간이 퇴근 10분 전에 자기 보고서를 저한테 넘기고 먼저 퇴근했어요. 이번이 벌써 세 번째예요. 다음 날 회의에서는 그 보고서를 자기가 다 한 것처럼 발표하더라고요..."></textarea>
+        <div class="counter"><span id="storyCount">0</span> / 2000</div>
+        <div class="warn" id="nameWarn"></div>
+      </div>
+
+      <div class="field">
+        <span class="label">얼마나 자주 그랬나요?</span>
+        <div class="seg" id="freqSeg">
+          <button type="button" data-v="0">처음</button>
+          <button type="button" data-v="1" class="on">가끔</button>
+          <button type="button" data-v="2">자주</button>
+          <button type="button" data-v="3">상습범</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="unfair">억울 지수</label>
+        <div class="range-row">
+          <input type="range" id="unfair" min="1" max="10" value="5">
+          <div class="range-val" id="unfairVal"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="selfFault">혹시 나도 잘못한 부분이 있다면? <span class="hint">선택 · 솔직할수록 공정한 판결</span></label>
+        <textarea id="selfFault" maxlength="500" placeholder="예) 저도 참다가 결국 언성을 높였어요."></textarea>
+      </div>
+
+      <button class="submit" id="submitBtn">⚖️ 사건 접수하기</button>
+      <div class="err" id="err"></div>
+    </section>
+
+    <!-- 심리 중 -->
+    <section class="card deliberating" id="delib">
+      <div class="big">🐹</div>
+      <h3>재판부 심리 중<span class="dots"></span></h3>
+      <p id="delibMsg"></p>
+    </section>
+
+    <!-- 판결문 -->
+    <section class="card verdict" id="verdict"></section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   데이터
+   ========================================================= */
+const NICKS = ['그 인간', '빌런 A', '빌런 B', '그분', '저세상 빌런', '김부장(가명)'];
+
+const TYPES = {
+  dump: {
+    label:'📦 업무 떠넘기기', name:'업무 떠넘기기', base:24,
+    react:'일을 떠넘겼다고요? 해바라기씨가 목에 걸릴 뻔했어요.',
+    crimes:['업무 무단 투척죄','책임 증발 및 잠적죄','퇴근 직전 폭탄 투하죄','"이것 좀 해줄래?" 남용죄'],
+    wrongs:['자기 몫의 업무를 정당한 사유 없이 원고에게 전가함','업무 분배의 공정성을 훼손하고 책임을 회피함'],
+    grievances:['내 일도 아닌데 시간과 스트레스는 고스란히 원고의 몫이 됨','거절하기 어려운 분위기 속에서 일을 떠안을 수밖에 없었음'],
+    penalties:['남의 업무 대리 체험 {n}주','받은 일 목록 손글씨로 {n}번 필사','"제 일은 제가 할게요" 복창 {n}0회']
+  },
+  credit: {
+    label:'🏆 공로 가로채기', name:'공로 가로채기', base:28,
+    react:'남의 공을 가로채다니... 제 볼주머니 도토리를 훔친 것과 같아요!',
+    crimes:['타인 공로 무단 흡수죄','성과 세탁죄','남의 아이디어 무단 도용죄','숟가락 얹기 상습죄'],
+    wrongs:['원고가 이룬 성과를 자신의 것처럼 포장함','원고의 기여를 의도적으로 지우거나 축소함'],
+    grievances:['고생한 사람은 따로 있는데 박수는 엉뚱한 사람이 받음','정당한 인정과 평가의 기회를 빼앗김'],
+    penalties:['전체 회의에서 "사실 이건 원고가 했습니다" 낭독 {n}회','원고 칭찬 메일 전사 발송 {n}통','결과물 표지에 원고 이름 금박 인쇄형 {n}부']
+  },
+  gossip: {
+    label:'🗣️ 뒷담화', name:'뒷담화', base:24,
+    react:'뒤에서 험담이라니... 햄스터 귀는 다 듣고 있답니다.',
+    crimes:['뒷담 유포 및 확산죄','없는 자리 명예 훼손죄','단톡방 여론 조작죄','카더라 통신 운영죄'],
+    wrongs:['원고가 없는 자리에서 원고에 대한 부정적인 말을 퍼뜨림','사실 확인 없는 이야기로 원고의 평판을 깎아내림'],
+    grievances:['해명할 기회조차 없이 이미지가 나빠짐','주변 사람들의 시선이 신경 쓰여 마음고생을 함'],
+    penalties:['본인 칭찬만 하는 단톡방 {n}일 운영','앞담화(칭찬)로 {n}0회 상쇄','입에 지퍼 스티커 부착 {n}일']
+  },
+  kkondae: {
+    label:'👴 꼰대 행동', name:'꼰대 행동', base:20,
+    react:'"나 때는 말이야~" 라떼는 제 쳇바퀴에서나 돌리라고 하세요.',
+    crimes:['라떼 강제 주입죄','시대착오적 훈계죄','"요즘 애들은" 일반화죄','답정너 회의 진행죄'],
+    wrongs:['자신의 경험과 방식만을 정답으로 강요함','원고의 의견을 나이·연차를 이유로 무시함'],
+    grievances:['합리적인 의견을 내도 "어려서 몰라"로 묵살당함','쓸데없는 훈계를 듣느라 시간과 기력을 소모함'],
+    penalties:['MZ 신조어 시험 {n}회 응시(합격할 때까지)','"나 때는" 발언 시 1회당 커피 쏘기 {n}0잔 적립','최신 트렌드 리포트 {n}편 작성']
+  },
+  gapjil: {
+    label:'😤 갑질·막말', name:'갑질·막말', base:32,
+    react:'막말과 갑질은 중대한 사안이에요. 털이 곤두서네요!',
+    crimes:['지위 남용 갑질죄','언어 폭력 남발죄','인격 무시 및 모독죄','감정 쓰레기 투기죄'],
+    wrongs:['지위나 관계를 이용해 원고에게 부당한 요구를 함','원고에게 모욕적이거나 상처가 되는 말을 함'],
+    grievances:['부당한 대우에도 관계 때문에 참아야만 했음','상처가 되는 말이 오래도록 마음에 남음'],
+    penalties:['존댓말 화법 집중 교정 {n}주','원고에게 정중한 사과문 A4 {n}장','감정 조절 명상 {n}0시간']
+  },
+  freeride: {
+    label:'🚌 무임승차', name:'무임승차', base:24,
+    react:'아무것도 안 하고 숟가락만? 쳇바퀴도 안 굴리는 햄스터 같네요.',
+    crimes:['팀플 무임승차죄','기여도 허위 기재죄','연락 두절 잠수죄','"저도 했어요" 위증죄'],
+    wrongs:['공동 작업에 실질적으로 기여하지 않음','다른 사람의 노력에 기대어 같은 평가를 받으려 함'],
+    grievances:['남들 몫까지 떠맡아 몇 배로 고생함','열심히 한 사람과 안 한 사람이 같은 평가를 받는 불공정함'],
+    penalties:['다음 프로젝트 전담 수행 {n}건','팀원 전원에게 간식 조공 {n}회','기여도 0% 명찰 패용 {n}일']
+  },
+  promise: {
+    label:'🔄 말 바꾸기', name:'말 바꾸기·약속 파기', base:22,
+    react:'말을 바꿨다고요? 기록은 거짓말을 하지 않아요.',
+    crimes:['말 바꾸기 상습죄','약속 무단 파기죄','"내가 언제 그랬어" 기억 조작죄','기분 따라 지시 변경죄'],
+    wrongs:['이미 한 약속이나 지시를 일방적으로 번복함','번복으로 생긴 혼란의 책임을 원고에게 돌림'],
+    grievances:['믿고 준비한 시간과 노력이 허사가 됨','억울하게 "왜 그렇게 했냐"는 말까지 들음'],
+    penalties:['모든 발언 녹취 및 공증 {n}주','"말한 대로 하겠습니다" 각서 {n}장','지시사항 문서화 의무 {n}개월']
+  },
+  etc: {
+    label:'🌀 기타 민폐', name:'기타 민폐', base:18,
+    react:'세상엔 참 다양한 빌런이 있네요. 자세히 들어볼게요.',
+    crimes:['신종 민폐 유발죄','분위기 파괴죄','눈치 상실죄'],
+    wrongs:['원고에게 불필요한 불편과 피해를 줌','타인을 배려하지 않는 행동을 반복함'],
+    grievances:['신경 쓰고 싶지 않은 일에 에너지를 빼앗김','혼자만 예민한 사람이 될까 봐 말도 못 함'],
+    penalties:['매너 교육 이수 {n}시간','동료 배려 실천 일지 {n}일 작성','탕비실 정리 당번 {n}주']
+  }
+};
+
+/* 사연 속 키워드 → 정황 */
+const AGGRAVATORS = [
+  { re:/매번|맨날|항상|늘 그|또 |또다시|계속|자꾸|상습|번째|몇 번|여러 번/, w:8, tag:'상습성', mod:'상습',
+    wrong:'한두 번이 아니라 반복적으로 같은 행동을 함' },
+  { re:/퇴근|야근|밤늦|새벽|밤 \d|늦게까지/, w:6, tag:'퇴근 시간 침해', mod:'야간',
+    wrong:'원고의 퇴근 시간과 저녁을 침범함', grief:'소중한 저녁 시간을 빼앗김' },
+  { re:/주말|휴가|연차|휴일|쉬는 날|명절/, w:7, tag:'휴식권 침해', mod:'휴일',
+    wrong:'원고의 휴일·휴가까지 침해함', grief:'쉬어야 할 날에도 마음 편히 쉬지 못함' },
+  { re:/소리|고함|버럭|화를 내|화냈|짜증|윽박|언성/, w:8, tag:'언성 높임', mod:'고성',
+    wrong:'언성을 높이거나 감정적으로 원고를 대함', grief:'큰소리를 듣고 위축되고 놀람' },
+  { re:/욕|반말|무시|비꼬|조롱|비웃|한심|멍청|바보|비하/, w:10, tag:'인격 무시', mod:'모욕적',
+    wrong:'원고를 무시하거나 모욕하는 언행을 함', grief:'인격적으로 존중받지 못해 자존감이 상함' },
+  { re:/내 아이디어|내가 만든|내가 한|내가 다|제가 다|제가 만든|제가 한|내 기획|내 보고서|제 보고서|제 아이디어|밤새/, w:8, tag:'원고 기여 명확',
+    grief:'분명히 원고가 노력한 흔적이 있음' },
+  { re:/몰래|뒤에서|없을 때|단톡|험담|소문/, w:7, tag:'은밀성', mod:'은밀한',
+    wrong:'원고가 모르게, 뒤에서 일을 꾸밈' },
+  { re:/회의|사람들 앞|다 있는|공개|여러 명|모두 앞|전체/, w:7, tag:'공개 망신', mod:'공개석상',
+    wrong:'여러 사람 앞에서 원고를 곤란하게 만듦', grief:'다른 사람들 앞에서 체면이 깎임' },
+  { re:/라떼|나 때는|나때는|요즘 애들|요즘 것들|MZ|엠지/, w:6, tag:'라떼 화법', mod:'라떼',
+    wrong:'"나 때는~" 식의 시대착오적 훈계를 늘어놓음' },
+  { re:/거짓말|모른 척|발뺌|기억 안|내가 언제|오리발|핑계/, w:8, tag:'발뺌·거짓', mod:'뻔뻔한',
+    wrong:'잘못을 인정하지 않고 발뺌하거나 거짓말함', grief:'사과는커녕 오히려 거짓말쟁이 취급을 받음' },
+  { re:/울었|눈물|잠을 못|스트레스|힘들|우울|퇴사|그만두/, w:6, tag:'정신적 피해',
+    grief:'눈물이 나고 잠을 설칠 만큼 마음고생을 함' },
+  { re:/상사|팀장|부장|과장|선배|사장|대표|임원|교수/, w:4, tag:'위계 관계',
+    grief:'윗사람이라 제대로 항의하기도 어려운 처지였음' }
+];
+
+/* 피고 측 정상참작 */
+const MITIGATORS = /오해|그럴 수도|사정이|몰랐|바빠서|아파서|아팠|처음이|실수였|사과했|미안하다고|사과를 받/;
+
+/* 원고 측 과실 */
+const SELF_FAULTS = [
+  { re:/나도|저도|제가 먼저|내가 먼저/, tag:'원고도 일부 관여', w:8 },
+  { re:/언성|소리를 질|화를 냈|화냈|대들|말대꾸|싸웠|따졌/, tag:'원고의 감정적 대응', w:10, crime:'참다가 폭발한 죄' },
+  { re:/깜빡|잊어|까먹|늦었|지각|실수|놓쳤/, tag:'원고의 실수', w:10, crime:'깜빡 과실죄' },
+  { re:/거절 못|못 거절|말을 못|참았|가만히/, tag:'원고의 침묵(정상참작)', w:3 },
+  { re:/뒷담|험담|욕했|흉봤/, tag:'원고도 뒷담화', w:10, crime:'맞뒷담 방어죄' }
+];
+
+const FREQ = [
+  { label:'처음', w:0 }, { label:'가끔', w:8 }, { label:'자주', w:16 }, { label:'상습범', w:25 }
+];
+
+const UNFAIR_LABEL = ['','😐 조금 서운','🙂 살짝 억울','😕 좀 억울','😒 억울','😣 꽤 억울','😤 많이 억울','😠 매우 억울','😭 너무 억울','🤬 피가 거꾸로','🌋 하늘이 무너짐'];
+
+/* =========================================================
+   햄스터 표정
+   ========================================================= */
+const EYE = (x,y)=>`<circle cx="${x}" cy="${y}" r="7" fill="#2b2118"/><circle cx="${x+2.5}" cy="${y-2.5}" r="2.4" fill="#fff"/>`;
+const FACES = {
+  neutral: {
+    face: EYE(78,92)+EYE(122,92)+`<path d="M92 116 Q96 121 100 116 Q104 121 108 116" stroke="#7a4a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    extras:'', cheek:.7
+  },
+  curious: {
+    face: EYE(78,90)+EYE(122,90)+
+      `<path d="M68 76 Q78 70 88 75" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M112 75 Q122 70 132 76" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<ellipse cx="100" cy="120" rx="5" ry="6" fill="#7a3a32"/>`,
+    extras:'', cheek:.7
+  },
+  thinking: {
+    face: `<circle cx="81" cy="88" r="7" fill="#2b2118"/><circle cx="84" cy="85" r="2.4" fill="#fff"/>`+
+      `<circle cx="125" cy="88" r="7" fill="#2b2118"/><circle cx="128" cy="85" r="2.4" fill="#fff"/>`+
+      `<path d="M68 76 Q78 70 88 76" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M112 80 L132 80" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M94 119 L108 117" stroke="#7a4a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    extras:`<g font-family="Jua" fill="#fff6e0"><text x="160" y="40" font-size="26">?</text><circle cx="150" cy="58" r="3"/><circle cx="144" cy="68" r="2"/></g>`,
+    cheek:.5
+  },
+  stern: {
+    face: `<circle cx="78" cy="93" r="7" fill="#2b2118"/><circle cx="122" cy="93" r="7" fill="#2b2118"/>`+
+      `<rect x="68" y="80" width="20" height="10" fill="#e9b07a"/><rect x="112" y="80" width="20" height="10" fill="#e9b07a"/>`+
+      `<path d="M66 80 L90 86" stroke="#6a3a1e" stroke-width="4" stroke-linecap="round"/>`+
+      `<path d="M134 80 L110 86" stroke="#6a3a1e" stroke-width="4" stroke-linecap="round"/>`+
+      `<path d="M92 120 L108 120" stroke="#7a4a3a" stroke-width="3" stroke-linecap="round"/>`,
+    extras:'', cheek:.4
+  },
+  angry: {
+    face: `<circle cx="79" cy="95" r="6" fill="#2b2118"/><circle cx="121" cy="95" r="6" fill="#2b2118"/>`+
+      `<path d="M64 78 L92 90" stroke="#5a2a10" stroke-width="5" stroke-linecap="round"/>`+
+      `<path d="M136 78 L108 90" stroke="#5a2a10" stroke-width="5" stroke-linecap="round"/>`+
+      `<path d="M88 126 Q100 112 112 126 Z" fill="#7a2a22"/>`+
+      `<path d="M92 121 L108 121" stroke="#fff" stroke-width="2"/>`,
+    extras:`<g stroke="#e0362a" stroke-width="4" stroke-linecap="round" fill="none">
+        <path d="M150 30 q6 6 0 12"/><path d="M162 26 q-6 6 0 12" transform="translate(4 0)"/>
+        <path d="M152 24 q6 -6 12 0"/><path d="M152 46 q6 6 12 0"/></g>
+      <g fill="#fff" opacity=".8"><circle cx="30" cy="40" r="7"/><circle cx="22" cy="28" r="5"/><circle cx="170" cy="70" r="6"/></g>`,
+    cheek:1, cheekColor:'#ff6b5b'
+  },
+  confused: {
+    face: `<path d="M72 92 a6 6 0 1 1 6 6 a3 3 0 1 1 -3 -3" stroke="#2b2118" stroke-width="3" fill="none"/>`+
+      EYE(122,92)+
+      `<path d="M68 80 Q78 84 88 78" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M112 74 Q122 70 132 76" stroke="#7a4a2a" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M88 121 q4 -5 8 0 t8 0 t8 0" stroke="#7a4a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`,
+    extras:`<path d="M158 70 q-7 12 0 16 q7 -4 0 -16 Z" fill="#7cc4ff" stroke="#3d8ad9" stroke-width="1.5"/>
+      <path d="M44 74 q-6 10 0 13 q6 -3 0 -13 Z" fill="#7cc4ff" stroke="#3d8ad9" stroke-width="1.5"/>`,
+    cheek:.6
+  },
+  happy: {
+    face: `<path d="M70 94 Q78 84 86 94" stroke="#2b2118" stroke-width="4" fill="none" stroke-linecap="round"/>`+
+      `<path d="M114 94 Q122 84 130 94" stroke="#2b2118" stroke-width="4" fill="none" stroke-linecap="round"/>`+
+      `<path d="M90 116 Q100 132 110 116 Z" fill="#7a2a22"/><path d="M94 122 Q100 128 106 122" fill="#f08a8a"/>`,
+    extras:`<g fill="#ffd34d"><path d="M28 50 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z"/><path d="M168 36 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5z"/></g>`,
+    cheek:1
+  },
+  sad: {
+    face: EYE(78,93)+EYE(122,93)+
+      `<path d="M66 82 L88 78" stroke="#7a4a2a" stroke-width="3.5" stroke-linecap="round"/>`+
+      `<path d="M134 82 L112 78" stroke="#7a4a2a" stroke-width="3.5" stroke-linecap="round"/>`+
+      `<path d="M92 122 Q100 115 108 122" stroke="#7a4a3a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`+
+      `<path d="M72 101 q-3 10 0 14 q3 -4 0 -14Z" fill="#7cc4ff"/><path d="M128 101 q-3 10 0 14 q3 -4 0 -14Z" fill="#7cc4ff"/>`,
+    extras:'', cheek:.8
+  }
+};
+
+const ham = document.getElementById('hamster');
+let currentFace = '';
+function setFace(name){
+  if(currentFace === name) return;
+  currentFace = name;
+  const f = FACES[name];
+  document.getElementById('face').innerHTML = f.face;
+  document.getElementById('extras').innerHTML = f.extras;
+  ['cheekL','cheekR'].forEach(id=>{
+    const c = document.getElementById(id);
+    c.setAttribute('opacity', f.cheek);
+    c.setAttribute('fill', f.cheekColor || '#f4a6a6');
+    c.setAttribute('rx', f.cheek >= 1 ? 13 : 11);
+  });
+  ham.classList.remove('thinking','angry');
+  if(name === 'thinking') ham.classList.add('thinking');
+  if(name === 'angry') ham.classList.add('angry');
+}
+function say(text){
+  const b = document.getElementById('bubble');
+  b.textContent = text;
+  b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+}
+function setMeter(v){
+  v = Math.max(0, Math.min(100, Math.round(v)));
+  document.getElementById('meterFill').style.width = v + '%';
+  document.getElementById('meterTxt').textContent = v + '%';
+}
+function bangGavel(){
+  const g = document.getElementById('gavel');
+  g.classList.remove('bang'); void g.getBoundingClientRect(); g.classList.add('bang');
+}
+
+/* =========================================================
+   한국어 조사 처리
+   ========================================================= */
+function hasBatchim(word){
+  const w = String(word).replace(/\(가명\)$/,'').replace(/[\s\)\]\}'"]+$/,'').trim();
+  const c = w.slice(-1);
+  if(!c) return false;
+  const code = c.charCodeAt(0);
+  if(code >= 0xAC00 && code <= 0xD7A3) return (code - 0xAC00) % 28 !== 0;
+  if(/[0-9]/.test(c)) return '0136780'.includes(c);
+  if(/[a-z]/i.test(c)) return /[lmnr]/i.test(c);
+  return false;
+}
+const J = (w, a, b) => w + (hasBatchim(w) ? a : b);   // J('빌런 A','이','가')
+
+/* =========================================================
+   상태 & 입력 UI
+   ========================================================= */
+const state = { nick:'그 인간', types:new Set(), freq:1 };
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const $ = id => document.getElementById(id);
+
+// 별명 칩
+const nickWrap = $('nickChips');
+NICKS.forEach((n,i)=>{
+  const b = document.createElement('button');
+  b.type='button'; b.className='chip' + (i===0?' on':''); b.textContent=n;
+  b.onclick = ()=>{
+    state.nick = n; $('nickCustom').value='';
+    nickWrap.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c===b));
+    say(`좋아요, 피고를 '${n}'(으)로 부르겠습니다.`);
+    checkNames();
+  };
+  nickWrap.appendChild(b);
+});
+$('nickCustom').addEventListener('input', e=>{
+  const v = e.target.value.trim();
+  nickWrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  if(v){ state.nick = v; }
+  else { state.nick = NICKS[0]; nickWrap.firstChild.classList.add('on'); }
+  checkNames();
+});
+
+// 유형 칩
+const typeWrap = $('typeChips');
+Object.entries(TYPES).forEach(([key,t])=>{
+  const b = document.createElement('button');
+  b.type='button'; b.className='chip'; b.textContent=t.label;
+  b.onclick = ()=>{
+    if(state.types.has(key)){ state.types.delete(key); b.classList.remove('on'); }
+    else { state.types.add(key); b.classList.add('on'); say(t.react); }
+    livePreview(true);
+  };
+  typeWrap.appendChild(b);
+});
+
+// 빈도
+$('freqSeg').querySelectorAll('button').forEach(b=>{
+  b.onclick = ()=>{
+    state.freq = +b.dataset.v;
+    $('freqSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+    if(state.freq===3) say('상습범이라니! 가중처벌 사유로 메모해 둘게요. ✍️');
+    livePreview(state.freq!==3);
+  };
+});
+
+// 억울 지수
+function updUnfair(){
+  const v = +$('unfair').value;
+  $('unfairVal').textContent = UNFAIR_LABEL[v];
+}
+$('unfair').addEventListener('input', ()=>{
+  updUnfair();
+  const v = +$('unfair').value;
+  if(v >= 9) { say('저런... 얼마나 속상하셨을까요. 제가 꼭 들어볼게요.'); setFace('sad'); }
+  else livePreview(true);
+});
+updUnfair();
+
+// 사연 입력
+let typingTimer;
+$('story').addEventListener('input', ()=>{
+  $('storyCount').textContent = $('story').value.length;
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(()=>{ livePreview(false); checkNames(); }, 400);
+});
+$('selfFault').addEventListener('input', ()=>{
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(()=>livePreview(false), 400);
+});
+
+// 실명 감지
+const ROLE_WORDS = /^(우리|그|저|이|옆|윗|아랫|전|새|신입|팀|부|과|차|대|사|주|실|이사|선배|후배|동기|사장|교수|대리|과장|부장|차장|팀장|사원|주임|실장|책임|선임|수석|본부장|센터장|그분|그인간|빌런)/;
+const NAME_RE = /([가-힣]{3})\s?(씨|님|과장|대리|부장|차장|팀장|사원|주임|선배|실장|이사|책임|선임|수석|교수)/g;
+let foundNames = [];
+function checkNames(){
+  const text = $('story').value;
+  const set = new Set();
+  let m; NAME_RE.lastIndex = 0;
+  while((m = NAME_RE.exec(text))){
+    const name = m[1];
+    if(ROLE_WORDS.test(name)) continue;
+    if(/(님|씨|장|리|원|임|배|사)$/.test(name)) continue;
+    set.add(name);
+  }
+  foundNames = [...set];
+  const w = $('nameWarn');
+  if(foundNames.length){
+    w.innerHTML = `🙈 실명으로 보이는 단어가 있어요: <b>${foundNames.map(esc).join(', ')}</b><br>상대방 보호를 위해 별명으로 바꿔 주세요.<button type="button" id="replaceBtn">'${esc(state.nick)}'(으)로 바꾸기</button>`;
+    w.classList.add('show');
+    $('replaceBtn').onclick = ()=>{
+      let t = $('story').value;
+      foundNames.forEach(n=>{ t = t.split(n).join(state.nick); });
+      $('story').value = t;
+      $('storyCount').textContent = t.length;
+      checkNames();
+      say('실명은 가렸어요. 재판소는 익명을 보장합니다! 🤫');
+    };
+  } else {
+    w.classList.remove('show'); w.innerHTML='';
+  }
+}
+
+/* =========================================================
+   분석 엔진
+   ========================================================= */
+function analyze(){
+  const story = $('story').value.trim();
+  const self = $('selfFault').value.trim();
+  const unfair = +$('unfair').value;
+  const types = [...state.types];
+  if(!types.length) types.push('etc');
+
+  // 피고 점수
+  const bases = types.map(k=>TYPES[k].base).sort((a,b)=>b-a);
+  let v = bases[0] + (bases.length-1)*6;
+  const hits = AGGRAVATORS.filter(a=>a.re.test(story));
+  hits.forEach(h=> v += h.w);
+  v += FREQ[state.freq].w;
+  v += Math.min(story.length/40, 10);
+  v += (unfair-5) * 2;
+  const mitigated = MITIGATORS.test(story);
+  if(mitigated) v -= 12;
+  v = Math.max(5, Math.min(100, Math.round(v)));
+
+  // 원고 점수
+  let s = 0;
+  const selfHits = SELF_FAULTS.filter(f=>f.re.test(story) || f.re.test(self));
+  selfHits.forEach(f=> s += f.w);
+  if(self.length) s += 10 + Math.min(self.length/15, 12);
+  s = Math.min(100, Math.round(s));
+
+  // 판결
+  let kind;
+  if(v < 38 && s < 20)           kind = 'innocent';
+  else if(s >= 22 && s >= v*0.45) kind = 'mutual';
+  else if(v >= 78)                kind = 'heavy';
+  else                            kind = 'guilty';
+
+  return { story, self, unfair, types, v, s, hits, selfHits, mitigated, kind };
+}
+
+function livePreview(keepBubble){
+  const story = $('story').value.trim();
+  if(!story && !state.types.size){ setFace('neutral'); setMeter(0); return; }
+  const r = analyze();
+  setMeter(r.kind==='innocent' ? r.v*0.6 : r.v);
+  let face, line;
+  if(r.v >= 70){ face='angry'; line='으으... 듣기만 해도 괘씸하군요! 😠'; }
+  else if(r.v >= 45){ face='stern'; line='흠... 이건 그냥 넘어갈 일이 아닌 것 같네요.'; }
+  else if(story.length > 10){ face='curious'; line='오호, 그래서요? 계속 말씀해 주세요.'; }
+  else { face='neutral'; line='천천히 써 주세요. 저 해바라기씨 먹으면서 기다릴게요.'; }
+  if(r.s >= 20 && r.v < 70){ face='confused'; line='음? 원고 측 사정도 좀 있는 것 같은데요...'; }
+  setFace(face);
+  if(!keepBubble) say(line);
+}
+
+/* =========================================================
+   판결문 생성
+   ========================================================= */
+const KIND_INFO = {
+  heavy:   { stamp:'유 죄', color:'var(--red)',    sub:'중죄 · 가중처벌', face:'angry',
+             bubble:'탕! 탕! 탕! 피고는 중죄입니다! 이건 햄스터도 못 참아요! 😡' },
+  guilty:  { stamp:'유 죄', color:'#a8321f',       sub:'피고의 잘못이 인정됨', face:'stern',
+             bubble:'탕! 피고 유죄! 정의는 쳇바퀴처럼 돌아오는 법이죠.' },
+  mutual:  { stamp:'쌍방 과실', color:'var(--orange)', sub:'양측 모두 일부 책임 있음', face:'confused',
+             bubble:'탕! 음... 양쪽 다 조금씩 잘못이 있네요. 쌍방 과실입니다!' },
+  innocent:{ stamp:'무 죄', color:'var(--green)',  sub:'혐의 불충분 · 훈방', face:'happy',
+             bubble:'탕! 무죄! 이번엔 오해였을 수도 있어요. 그래도 마음은 알아요 🌻' }
+};
+
+function caseNo(){
+  const d = new Date();
+  return `${d.getFullYear()}빌합${String(Math.floor(Math.random()*9000)+1000)}`;
+}
+function today(){
+  const d = new Date();
+  return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.`;
+}
+
+function summarize(r){
+  const nick = state.nick;
+  const typeNames = r.types.map(k=>TYPES[k].name);
+  const sentences = r.story.replace(/\s+/g,' ').split(/(?<=[.!?。]|다\.|요\.)\s+/).filter(Boolean);
+  let quote = sentences.slice(0,2).join(' ');
+  if(quote.length > 120) quote = quote.slice(0,118) + '…';
+  const freqTxt = ['이번이 처음 있는 일이라고','가끔 이런 일이 있었다고','이런 일이 자주 반복되었다고','상습적으로 이런 일이 반복되어 왔다고'][state.freq];
+  const tags = r.hits.map(h=>h.tag);
+  let txt = `원고(익명)는 피고 '${esc(nick)}'에 대하여 <b>${typeNames.map(esc).join(', ')}</b> 혐의로 소를 제기하였다. `;
+  txt += `원고의 진술에 따르면 "${esc(quote)}"라고 하며, ${freqTxt} 한다. `;
+  if(tags.length) txt += `재판부는 사연 속에서 <b>${tags.map(esc).join(' · ')}</b>의 정황을 확인하였다. `;
+  if(r.mitigated) txt += `다만 피고 측에도 사정이나 오해의 여지가 일부 있는 것으로 보인다. `;
+  txt += `원고가 스스로 밝힌 억울 지수는 <b>10점 만점에 ${r.unfair}점</b>이다.`;
+  return txt;
+}
+
+function buildLists(r){
+  const wrongs = [], griefs = [];
+  r.types.forEach(k=>{ wrongs.push(TYPES[k].wrongs[0]); griefs.push(TYPES[k].grievances[0]); });
+  r.hits.forEach(h=>{ if(h.wrong) wrongs.push(h.wrong); if(h.grief) griefs.push(h.grief); });
+  if(r.types.length === 1){ const t = TYPES[r.types[0]]; wrongs.push(t.wrongs[1]); griefs.push(t.grievances[1]); }
+  if(state.freq >= 2) wrongs.push('같은 잘못을 고치지 않고 되풀이함');
+  if(r.unfair >= 8) griefs.push('혼자 꾹꾹 참아 온 감정이 한계에 이를 만큼 쌓임');
+  const uniq = a => [...new Set(a)];
+  return { wrongs: uniq(wrongs).slice(0,5), griefs: uniq(griefs).slice(0,5) };
+}
+
+function buildSelfList(r){
+  const list = r.selfHits.map(f=>f.tag);
+  if(r.self) list.unshift(`원고 스스로 "${r.self.length>60 ? r.self.slice(0,58)+'…' : r.self}"라고 진술함`);
+  return [...new Set(list)];
+}
+
+function buildCrimes(r){
+  const mods = r.hits.filter(h=>h.mod).map(h=>h.mod);
+  const crimes = r.types.map((k,i)=>{
+    let c = pick(TYPES[k].crimes);
+    const m = mods[i];
+    if(m && r.kind !== 'innocent') c = `${m} ${c}`;
+    return c;
+  });
+  if(r.kind === 'heavy') crimes.push('특수 괘씸죄');
+  if(state.freq === 3 && r.kind !== 'innocent' && !crimes.some(c=>c.startsWith('상습'))) crimes.push('상습 민폐 가중죄');
+  const selfCrimes = r.kind === 'mutual'
+    ? [...new Set(r.selfHits.filter(f=>f.crime).map(f=>f.crime))].concat(r.selfHits.some(f=>f.crime) ? [] : ['쌍방 감정 소모죄'])
+    : [];
+  return { crimes:[...new Set(crimes)], selfCrimes };
+}
+
+function buildSentence(r){
+  const nick = state.nick;
+  if(r.kind === 'innocent'){
+    return {
+      main:'훈방 조치',
+      items:[`피고 '${nick}'에게 "다음엔 조심 좀 하세요" 구두 경고 1회`, '원고와 피고, 각자 따뜻한 음료 한 잔 마시고 기분 전환하기', '재범 시 본 사건 기록을 증거로 즉시 재심 가능']
+    };
+  }
+  if(r.kind === 'mutual'){
+    const pv = Math.round(r.v/(r.v+r.s)*100);
+    return {
+      main:`쌍방 화해 명령 (피고 ${pv} : 원고 ${100-pv})`,
+      items:[`피고 '${nick}': ${pick(TYPES[r.types[0]].penalties).replace('{n}', Math.max(1,Math.round(r.v/30)))}`,
+             '원고: 다음엔 감정 대신 증거로 말하기 연습 1주',
+             '양측: 서로에게 커피 한 잔씩 사기 (샷 추가는 과실 비율에 따라)']
+    };
+  }
+  const n = Math.max(1, Math.round(r.v/25));
+  const items = r.types.map(k=> pick(TYPES[k].penalties).replace('{n}', n));
+  const months = Math.round(r.v/10) + state.freq*2;
+  const extras = [
+    `탕비실 믹스커피 사비로 채우기 ${n}개월`,
+    `사내 메신저 상태메시지 '반성 중 🙇' ${n*7}일 유지`,
+    `원고에게 진심 어린 사과 + 간식 조공 ${n}회`,
+    `엘리베이터 버튼 대신 눌러주기 ${n*10}회`
+  ];
+  items.push(pick(extras));
+  if(r.kind === 'heavy') items.push('재판장 햄스터의 째려보기 무기한 (집행유예 없음)');
+  return {
+    main: r.kind === 'heavy' ? `반성의 방 징역 ${months}개월 · 집행유예 없음` : `반성의 방 징역 ${months}개월 · 집행유예 ${Math.ceil(months/3)}개월`,
+    items: [...new Set(items)].slice(0,4)
+  };
+}
+
+function buildComfort(r){
+  const nick = state.nick;
+  const typeMsg = {
+    dump:'남의 몫까지 짊어지느라 정말 고생 많으셨어요. 거절 못 한 건 당신이 착해서지, 약해서가 아니에요.',
+    credit:'당신의 노력은 사라지지 않아요. 진짜 실력은 결국 드러나게 되어 있어요. 햄스터는 다 봤습니다.',
+    gossip:'없는 자리에서 하는 말은, 말한 사람의 품격을 보여줄 뿐이에요. 당신의 가치는 그대로예요.',
+    kkondae:'당신의 생각이 틀린 게 아니라, 시대가 바뀐 걸 모르는 쪽이 있을 뿐이에요.',
+    gapjil:'그런 말을 들을 이유는 어디에도 없어요. 상처받은 마음, 충분히 아파해도 괜찮아요.',
+    freeride:'혼자 몇 사람 몫을 해낸 당신, 정말 대단해요. 그 책임감은 언젠가 꼭 빛을 볼 거예요.',
+    promise:'믿고 준비했던 당신의 성실함은 잘못이 없어요. 흔들린 건 상대방의 말이었죠.',
+    etc:'신경 쓰고 싶지 않은 일에 마음을 쓰느라 지치셨죠. 여기까지 털어놓은 것만으로도 잘하셨어요.'
+  };
+  const main = typeMsg[r.types[0]] || typeMsg.etc;
+  let title, emo;
+  if(r.unfair >= 9){ title='토닥토닥, 정말 많이 힘드셨죠'; emo='🐹🧻'; }
+  else if(r.unfair >= 7){ title='많이 억울하셨겠어요'; emo='🐹🤍'; }
+  else if(r.kind === 'mutual'){ title='그래도 당신 마음은 이해해요'; emo='🐹🌻'; }
+  else { title='재판장의 한마디'; emo='🐹☕'; }
+  let tail = '';
+  if(r.kind === 'innocent') tail = ` 판결이 무죄라고 해서 당신이 느낀 감정이 틀린 건 아니에요.`;
+  if(r.kind === 'mutual')  tail = ` 서로 조금씩 엇갈렸을 뿐, 먼저 상처받은 마음은 진짜예요.`;
+  if(r.kind === 'heavy')   tail = ` '${nick}'의 행동은 명백히 선을 넘었어요. 혼자 참지 말고 믿을 만한 사람과도 꼭 나눠 보세요.`;
+  const end = pick(['오늘 저녁은 맛있는 거 드세요. 🍗','오늘 밤엔 푹 자기, 재판장 명령입니다. 🌙','해바라기씨 하나 드릴게요. 🌻','당신 편은 여기 있어요. 💛']);
+  return { title, emo, text: `${main}${tail} ${end}` };
+}
+
+function renderVerdict(r){
+  const info = KIND_INFO[r.kind];
+  const lists = buildLists(r);
+  const selfList = buildSelfList(r);
+  const { crimes, selfCrimes } = buildCrimes(r);
+  const sentence = buildSentence(r);
+  const comfort = buildComfort(r);
+  const showComfort = r.unfair >= 5 || r.kind === 'heavy' || r.kind === 'innocent';
+  const pv = Math.round(r.v/(r.v+Math.max(r.s,0.0001))*100);
+  const nick = state.nick;
+  const no = caseNo();
+
+  const reason = {
+    heavy:   `피고 '${nick}'의 행위는 그 정도가 무겁고 원고에게 미친 피해가 상당하므로 가중하여 처벌한다.`,
+    guilty:  `피고 '${nick}'의 행위는 원고에게 부당한 피해를 주었다고 인정되므로 유죄로 판단한다.`,
+    mutual:  `피고 '${nick}'의 잘못이 인정되나, 원고 측에도 일부 과실이 확인되어 쌍방 과실로 판단한다.`,
+    innocent:`제출된 사연만으로는 피고 '${nick}'의 고의적인 잘못을 단정하기 어려워 무죄로 판단한다. 단, 원고의 서운함은 정당하다.`
+  }[r.kind];
+
+  const html = `
+    <div class="v-head">
+      <div class="court">햄 스 터 빌 런 재 판 소</div>
+      <h2>판 결 문</h2>
+      <div class="v-meta"><span>사건번호 ${no}</span><span>선고일 ${today()}</span><span>피고 '${esc(nick)}'</span></div>
+    </div>
+
+    <div class="stamp-wrap">
+      <div class="stamp" id="stamp" style="color:${info.color}">${info.stamp}</div>
+      <div class="stamp-sub">${info.sub}</div>
+    </div>
+
+    <div class="sec">
+      <h3><span class="no">1</span>사건 요약</h3>
+      <p>${summarize(r)}</p>
+    </div>
+
+    <div class="sec">
+      <h3><span class="no">2</span>쟁점 분석</h3>
+      <div class="two">
+        <div class="box bad">
+          <h4>🙅 피고 '${esc(nick)}'의 잘못</h4>
+          ${r.kind==='innocent'
+            ? `<ul><li>고의성을 입증할 정황이 부족함</li>${lists.wrongs.slice(0,1).map(w=>`<li>다만 "${esc(w)}" 부분은 주의가 필요함</li>`).join('')}</ul>`
+            : `<ul>${lists.wrongs.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`}
+        </div>
+        <div class="box sad">
+          <h4>😢 원고의 억울한 부분</h4>
+          <ul>${lists.griefs.map(g=>`<li>${esc(g)}</li>`).join('')}</ul>
+        </div>
+      </div>
+      ${selfList.length ? `
+      <div class="box self">
+        <h4>🤔 원고 측 사정 ${r.kind==='mutual' ? '(과실 인정)' : '(참고)'}</h4>
+        <ul>${selfList.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+      </div>` : ''}
+      ${r.kind==='mutual' ? `
+      <div class="ratio">
+        <div class="ratio-bar">
+          <div style="width:${pv}%;background:var(--red)">피고 ${pv}%</div>
+          <div style="width:${100-pv}%;background:var(--orange)">원고 ${100-pv}%</div>
+        </div>
+        <div class="ratio-legend"><span>피고 '${esc(nick)}'</span><span>원고(나)</span></div>
+      </div>` : ''}
+      <p style="margin-top:12px">⚖️ ${esc(reason)}</p>
+    </div>
+
+    <div class="sec">
+      <h3><span class="no">3</span>죄목</h3>
+      ${r.kind==='innocent'
+        ? `<div class="crimes"><span class="crime light">혐의 없음</span><span class="crime light">단, '눈치 부족' 경고 1회</span></div>`
+        : `<div class="crimes">${crimes.map(c=>`<span class="crime">${esc(c)}</span>`).join('')}</div>
+           ${selfCrimes.length ? `<p style="margin:10px 0 0;font-size:14.5px">원고 측: ${selfCrimes.map(c=>`<span class="crime light" style="font-size:13.5px;padding:4px 10px">${esc(c)} (경미)</span>`).join(' ')}</p>` : ''}`}
+    </div>
+
+    <div class="sec">
+      <h3><span class="no">4</span>주문 (형량)</h3>
+      <div class="sentence">
+        <div class="main">${esc(sentence.main)}</div>
+        <ul>${sentence.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>
+      </div>
+    </div>
+
+    ${showComfort ? `
+    <div class="sec">
+      <h3><span class="no">5</span>재판장의 위로</h3>
+      <div class="comfort">
+        <div class="emo">${comfort.emo}</div>
+        <div><h4>${esc(comfort.title)}</h4><p>${esc(comfort.text)}</p></div>
+      </div>
+    </div>` : ''}
+
+    <div class="sign">${today()}<br>재판장 판사 <b>햄 스 터</b><span class="seal">햄스터<br></span></div>
+    <div class="disclaimer">※ 본 판결은 법적 효력이 전혀 없으며, 해바라기씨를 좋아하는 햄스터의 지극히 주관적인 의견입니다.</div>
+
+    <div class="actions">
+      <button id="copyBtn">📋 판결문 복사</button>
+      <button id="editBtn">✏️ 사연 수정해서 재심</button>
+      <button id="newBtn" class="primary">🆕 새 사건 접수</button>
+    </div>
+  `;
+  const el = $('verdict');
+  el.innerHTML = html;
+
+  // 복사용 텍스트
+  const plain = [
+    `[빌런 재판소 판결문] 사건번호 ${no}`,
+    `판결: ${info.stamp.replace(/\s/g,'')} (${info.sub})`,
+    ``,
+    `■ 피고: ${nick}`,
+    `■ 사건 유형: ${r.types.map(k=>TYPES[k].name).join(', ')}`,
+    `■ 죄목: ${r.kind==='innocent' ? '혐의 없음' : crimes.join(', ')}`,
+    `■ 형량: ${sentence.main}`,
+    ...sentence.items.map(i=>`  - ${i}`),
+    showComfort ? `\n■ 재판장의 위로: ${comfort.text}` : '',
+    `\n※ 본 판결은 법적 효력이 없습니다. — 재판장 햄스터`
+  ].join('\n');
+
+  $('copyBtn').onclick = ()=> copyText(plain);
+  $('editBtn').onclick = ()=> { showForm(); say('사연을 고쳐서 다시 접수해 주세요. 재심 받아드립니다!'); };
+  $('newBtn').onclick = ()=> { resetForm(); showForm(); };
+
+  // 연출
+  setTimeout(()=>{
+    $('stamp').classList.add('go');
+    bangGavel();
+    setFace(info.face);
+    say(info.bubble);
+    setMeter(r.kind==='innocent' ? 10 : r.kind==='mutual' ? r.v*0.7 : r.v);
+  }, 250);
+
+  if(showComfort && r.unfair >= 8){
+    setTimeout(()=>{ setFace('sad'); say('그런데... 사연 읽다가 저도 눈물이 났어요. 정말 고생 많으셨어요 🥲'); }, 4200);
+  }
+}
+
+/* =========================================================
+   흐름 제어
+   ========================================================= */
+const DELIB_MSGS = [
+  '증거 자료를 볼주머니에 넣는 중',
+  '해바라기씨 까면서 고민하는 중',
+  '쳇바퀴 돌리며 법전 뒤적이는 중',
+  '배심원 햄스터들과 회의 중',
+  '판결문 작성 중'
+];
+
+$('submitBtn').addEventListener('click', ()=>{
+  const story = $('story').value.trim();
+  const err = $('err');
+  if(story.length < 15){
+    err.textContent = '사연을 조금만 더 자세히 써 주세요. (15자 이상)';
+    setFace('confused'); say('음... 이것만으로는 판결하기 어려워요. 조금 더 들려주세요!');
+    $('story').focus();
+    return;
+  }
+  if(foundNames.length){
+    err.textContent = '실명으로 보이는 단어가 있어요. 별명으로 바꾼 뒤 접수해 주세요.';
+    say('잠깐! 실명은 가려 주셔야 해요. 🙈');
+    $('nameWarn').scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  err.textContent = '';
+  const r = analyze();
+
+  $('formCard').classList.add('hidden');
+  $('verdict').classList.remove('show');
+  $('delib').classList.add('show');
+  setFace('thinking');
+  say('흠... 심리를 시작하겠습니다. 정숙해 주세요!');
+  window.scrollTo({top:0, behavior:'smooth'});
+
+  let i = 0;
+  $('delibMsg').textContent = DELIB_MSGS[0];
+  const iv = setInterval(()=>{
+    i++;
+    if(i < DELIB_MSGS.length) $('delibMsg').textContent = DELIB_MSGS[i];
+  }, 550);
+
+  setTimeout(()=>{
+    clearInterval(iv);
+    $('delib').classList.remove('show');
+    renderVerdict(r);
+    $('verdict').classList.add('show');
+  }, 2800);
+});
+
+function showForm(){
+  $('verdict').classList.remove('show');
+  $('formCard').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function resetForm(){
+  $('story').value=''; $('selfFault').value=''; $('storyCount').textContent='0';
+  $('nickCustom').value=''; state.nick = NICKS[0];
+  nickWrap.querySelectorAll('.chip').forEach((c,i)=>c.classList.toggle('on', i===0));
+  state.types.clear(); typeWrap.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  state.freq = 1; $('freqSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.v==='1'));
+  $('unfair').value = 5; updUnfair();
+  checkNames(); setMeter(0); setFace('neutral');
+  say('새 사건을 접수합니다. 무슨 일이 있었나요?');
+}
+
+function copyText(t){
+  const done = ()=> toast('판결문이 복사되었어요! 📋');
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t, done));
+  } else fallbackCopy(t, done);
+}
+function fallbackCopy(t, done){
+  const ta = document.createElement('textarea');
+  ta.value = t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){ toast('복사에 실패했어요 😢'); }
+  ta.remove();
+}
+let toastTimer;
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+// 햄스터 클릭 반응
+const POKES = ['찍찍! 재판 중엔 정숙!','저 간지러워요 🐹','법정 모독죄로 해바라기씨 1개 벌금입니다.','판결은 공정하게! 아마도...','볼주머니에 증거 보관 중이에요.'];
+ham.addEventListener('click', ()=>{ say(pick(POKES)); bangGavel(); });
+
+setFace('neutral');
+</script>
+</body>
+</html>
